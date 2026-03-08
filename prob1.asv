@@ -1,0 +1,69 @@
+clc
+format longG
+%% planets and their constants at J2000
+
+planets = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
+a_list = [0.387099 0.723332 1 1.523662 5.203363 9.53707 19.19126 30.06896 39.48169]; % AU
+e_list = [0.205631 0.006773 0.01671 0.093412 0.048393 0.054151 0.047168 0.008586 0.248808];
+p_list = a_list .* (1 - e_list.^2);
+i_list = [7.00487 3.39471 0.00005 1.85061 1.3053 2.48446 0.76986 1.76917 17.14175]; % deg
+Omega_list = [48.33167 76.68069 -11.26064 49.57854 100.55615 113.71504 74.22988 131.72169 110.30347]; % longitude of ascending node, deg
+ap_list = [29.12478 54.85229 114.20783 286.4623 -85.8023 -21.2831 96.73436 -86.75034 113.76329]; % arg of periapses, deg
+theta_list = [174.7944 50.44675 -2.48284 19.41248 19.55053 -42.4876 142.2679 259.9087 14.86205]; % true anomaly, deg
+mu_list = [22032 324859 398600 42828 126686534 37931187 5793947 6836529 1001]; % km_3 / s^2
+
+% mu_sun = 132712440018; % km^3 / s^2
+mu_sun = 1; % Au^3 / TU^2
+
+J2000 = datetime(2000,1,1,11,58,0);
+target_date = datetime(2026,12,15,11,12,0); % actual date
+% target_date = datetime(2023,12,1,5,11,0); % test date. should see true anomalies of 325.9 and 262.98 deg for earth and mars respectively.
+dt = days(target_date - J2000)/58.13; % TU
+
+theta_space = linspace(0,2*pi,500);
+
+%% find orbit at target date for each planet and output
+num_planets = length(a_list);
+
+r_vec_out = zeros(num_planets,3);
+v_vec_out = zeros(num_planets,3);
+theta_out = zeros(num_planets,1);
+
+for pl = 1:num_planets
+    % get elements at J2000 (TODO try to multi-assign these)
+    a = a_list(pl);
+    e = e_list(pl);
+    p = p_list(pl);
+    i = i_list(pl);
+    Om = Omega_list(pl);
+    ap = ap_list(pl);
+    theta = theta_list(pl);
+
+    % modulating dt by period of orbit
+    period = (2*pi*sqrt(a^3/mu_sun)); % s
+    dt_planet = mod(dt, period); 
+
+    % disp(dt)
+
+    % convert to vector
+    [R1, V1] = orbital_ele_to_r_v(a,e,i,Om,ap,theta,mu_sun);
+    % disp(R1)
+    % disp(V1)
+    %get R2,V2 from kepler solver
+    [R2, V2] = keplerTOF(R1,V1,mu_sun,dt_planet);
+    % disp(R2)
+    % disp(V2)
+
+    % extract theta from output R2,V2 in the smartest way possible(lol)
+    [~,~,~,~,~,theta2] = r_v_to_orbital_ele(R2,V2,mu_sun);
+
+    % assign data to output arrays
+    r_vec_out(pl,:) = round(R2,4);
+    v_vec_out(pl,:) = round(V2,4);
+    theta_out(pl) = round(theta2,4);
+
+end
+
+%% output data
+output = table(planets',r_vec_out, v_vec_out, theta_out,'VariableNames',{'Planet', 'R(km)', 'V(km/s)', 'True Anomaly (deg)'});
+disp(output)
