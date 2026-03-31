@@ -7,7 +7,6 @@ function [x_best, dv_best] = differential_evolution(fitness_fn, lb, ub, opts)
     N  = length(lb);
     NP = opts.pop_size;
 
-    % TODO handle boolean values in state vector
     % Initialize population uniformly in [lb, ub]
     pop = lb + rand(NP, N) .* (ub - lb);
 
@@ -39,9 +38,7 @@ function [x_best, dv_best] = differential_evolution(fitness_fn, lb, ub, opts)
             end
         end
 
-        if mod(gen, 50) == 0
-            fprintf('Gen %d | Best ΔV: %.4f km/s\n', gen, min(fitness_vals));
-        end
+        fprintf('Gen %d | Best ΔV: %.4f km/s\n', gen, min(fitness_vals));
     end
 
     [dv_best, best_idx] = min(fitness_vals);
