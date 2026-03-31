@@ -64,7 +64,7 @@ function [V1,V2] = gauss_lam(R1, R2, TOF, path_type)
 
         % break and warn if max iter reached
         if iter >= N_max
-            warning('gauss_lambert: maximum iterations reached. Result may be inaccurate.');
+            % warning('gauss_lambert: maximum iterations reached. Result may be inaccurate.');
             break
         end
     end
@@ -81,7 +81,7 @@ function [V1,V2] = gauss_lam(R1, R2, TOF, path_type)
     % lagrange identity sanity check
     lagrange_err = abs(f*gdot - fdot*g - 1);
     if lagrange_err > 1e-6
-        warning('Lagrange identity error = %.2f (check inputs)', lagrange_err);
+        % warning('Lagrange identity error = %.2f (check inputs)', lagrange_err);
     end
 
 end
