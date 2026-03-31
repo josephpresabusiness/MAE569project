@@ -8,7 +8,10 @@ function [R2,V2,theta2] = r_v_after_j2000(planet,target_date)
     theta_list = [174.7944 50.44675 -2.48284 19.41248 19.55053 -42.4876 142.2679 259.9087 14.86205]; % true anomaly, deg
 
     mu_sun = 1; % Au^3 / TU^2
-    
+
+    if isa(target_date, "double")
+        target_date = datetime(target_date,'ConvertFrom','datenum');
+    end
     J2000 = datetime(2000,1,1,11,58,0);
     dt = days(target_date - J2000)/58.13; % TU (1 TU in mu=1 space is 1/2pi years = 58.13 days)
     
