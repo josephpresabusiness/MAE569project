@@ -1,6 +1,18 @@
-% TODO get some better state vector i made ts up
-lb = [9497,   30,  30, 100,  500,   200,   200,  1e5,  0,  0,  0,  0];
-ub = [16861, 400, 400, 800, 5000, 10000, 10000, 3e5,  1,  1,  1,  1];
+% lower and upper bounds
+% note: strange numbers in spot 1 are datenum format for start and end of
+% launch window i.e. 2026-1-1, 2046-12-31
+lb = [739983,... % launch time
+    1,  1,  10, 60,... % transfer time, TU
+    200,   200,   1e5,... % flyby height, km
+    0,0,0,0]; % path type
+ub = [747652,... % launch time
+    10, 10, 40, 475,... % transfer time, TU
+    10000, 10000, 3e5,... % flyby height, km
+    1,1,1,1]; % path type
+% max expcected TU for hohmann transfers:
+% e <-> m: 8.907 TU
+% m-> j: 38.732 TU
+% j-> n: 465.9 TU
 
 % differential evolution options
 opts.pop_size = 200;
