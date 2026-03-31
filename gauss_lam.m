@@ -4,7 +4,7 @@ function [V1,V2] = gauss_lam(R1, R2, TOF, path_type)
     %    R1    - initial position vector [3x1], DU
     %    R2    - final position vector [3x1], DU
     %    TOF       - time of flight, TU
-    %    path_type - 'short' or 'long'  (prograde/retrograde)
+    %    path_type - 0 is short/propgrade, 1 is long/retrograde
     %
     %   outputs:
     %    v1 - vel at r1, DU/TU
@@ -17,24 +17,22 @@ function [V1,V2] = gauss_lam(R1, R2, TOF, path_type)
     r1 = norm(R1);
     r2 = norm(R2);
     theta = acos(dot(R1, R2) / (r1 * r2));
-    if path_type == "long"
+    if path_type == 1 % if path type is *long*
         theta = 2*pi - theta;
     end
     A = (sqrt(r1*r2)*sin(theta)) / sqrt(1 - cos(theta));
 
     
     % initial output
-    fprintf('  solving for %s path\n', path_type);
-    fprintf('  |r1| = %.6f DU   |r2| = %.6f DU   TOF = %.6f TU\n\n', r1, r2, TOF);
+    % fprintf('  solving for %s path\n', path_type);
+    % fprintf('  |r1| = %.6f DU   |r2| = %.6f DU   TOF = %.6f TU\n\n', r1, r2, TOF);
 
     % initial table row
-    fprintf('  %4s  %12s  %12s  %12s  %14s  %12s\n', ...
-            'Iter', 'z', 'y', 'x', 't(z)', 'dt/dz');
-    fprintf('%s\n', repmat('=',1,72));
+    % fprintf('  %4s  %12s  %12s  %12s  %14s  %12s\n', ...
+    %         'Iter', 'z', 'y', 'x', 't(z)', 'dt/dz');
+    % fprintf('%s\n', repmat('=',1,72));
 
     z = 0.0;
-    z_max = 4*pi^2;
-    z_min = -z_max;
     iter = 0;
     while true
         iter = iter + 1;
@@ -44,11 +42,6 @@ function [V1,V2] = gauss_lam(R1, R2, TOF, path_type)
 
         y = r1 + r2 - A*(1 - z*S)/sqrt(C);
 
-        % if y < 0 % try midpoint if y is bugging. might not even be needed
-        %     z = (z + 4*pi^2)/2;
-        %     continue
-        % end
-
         x = sqrt(y/C);
         t_z = (x^3*S + A*sqrt(y)) / sqrt(mu);
         dtdz = get_dtdz(x, y, z, C, S, A, mu);
@@ -56,13 +49,13 @@ function [V1,V2] = gauss_lam(R1, R2, TOF, path_type)
         dz = (TOF - t_z) / dtdz; % newton step
 
         
-        fprintf('  %4d  %12.6f  %12.6f  %12.6f  %14.8f  %12.6f\n', ...
-                iter, z, y, x, t_z, dtdz); % output results
+        % fprintf('  %4d  %12.6f  %12.6f  %12.6f  %14.8f  %12.6f\n', ...
+                % iter, z, y, x, t_z, dtdz); % output results
 
         % break if converged
         if abs(TOF - t_z) < tol
-            fprintf('  Converged in %d iterations.  residual = %.3e TU\n\n', ...
-                    iter, abs(TOF - t_z));
+            % fprintf('  Converged in %d iterations.  residual = %.3e TU\n\n', ...
+                    % iter, abs(TOF - t_z));
             break
         end
 
