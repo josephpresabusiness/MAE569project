@@ -3,14 +3,20 @@ function dv_total = fitness (x)
     % note: TOFs in tu, flyby heights in km
     % note: scalar r,v in lowercase, vector R,V in uppercase.
 
+    %% convenient constants
+    TU_s = 5022432; % 1 TU in seconds
+    AU_km = 149597870.7; % 1 AU in km
+
     %% unpacking state vector
     launch_time = x(1); % datetime after J2000
     TOFs = x(2:5); % e>m, m>e, e>j, j>n respectively. in TU
-    flyby_heights = x(6:8); %m, e, j flyby heights respectively
+    flyby_heights = x(6:8); %m, e, j flyby heights respectively (km)
     gauss_maneuver_directions = x(9:12); % 'short'/'long'
     % note for me: 2000 km orbit at neptune, 500 km orbit at earth.
 
-    % ASSUMPTION MADE: time spent in flyby is negligible
+    % ASSUMPTION MADE: time spent in flyby is negligible. this is a fairly
+    % standard practice in preliminary mission design, so we feel fairly
+    % safe in assuming it. 
     t1 = launch_time;
     t2 = launch_date + TOFs(1);
     t3 = t2 + TOFs(2);
@@ -18,6 +24,7 @@ function dv_total = fitness (x)
     t5 = t4 + TOFs(4);
 
     %% planet states + data
+
     [R_e0, V_e0] = r_v_after_j2000('Earth',   t1);
     [R_m,  V_m]  = r_v_after_j2000('Mars',    t2);
     [R_e1, V_e1] = r_v_after_j2000('Earth',   t3);
@@ -26,53 +33,56 @@ function dv_total = fitness (x)
 
     dv_total = 0;
 
-    % TODO set actual data. r in km, mu in km^3/s^2
-    rad_earth = 1;
-    mu_earth = 1;
-    rad_mars = 1;
-    mu_mars = 1;
-    rad_jup = 1;
-    mu_jup = 1;
-    rad_neptune = 1;
-    mu_neptune = 1;
+    % radius and std gravitational parameter for relevant planets
+    % TODO check these conversions bc i trust nothing
 
-    %% leg 1: earth orbit to mars 
-    
-    v0 = sqrt(mu_earth/(rad_earth + 500)); % earth orbit velocity
-    % TODO convert from km/s to AU/TU
+    rad_earth = 6378.1366 / AU_km;
+    mu_earth = 398600 * (TU_s^2 / AU_km^3);
+    rad_mars = 3396.19 / AU_km;
+    mu_mars = 42828 * (TU_s^2 / AU_km^3);
+    rad_jup = 71492 / AU_km;
+    mu_jup = 126686000 * (TU_s^2 / AU_km^3);
+    rad_neptune = 24764 / AU_km;
+    mu_neptune = 6835100 * (TU_s^2 / AU_km^3); 
+
+    %% calculating velocity vectors for transfer orbits
+    % earth to mars
     [V1, V2] = gauss_lam(R_e0, R_m, TOFs(1), gauss_maneuver_directions(1));
-    % DV 1: leaving earth orbit
-    dv_total = dv_total + norm(V1 - V_e0) - v0; % subtracting v0 to assume optimal launch angle
 
-    %% leg 2: mars flyby
-    % TODO write flyby func, make it assume ballistic trajectory. ignore
-    % the horrifying mishmash of units in the mockup so far
-    V_marsfb_out = flyby_exit_vel(V2, V_m, flyby_heights(1), rad_mars, mu_mars);
-
-    %% leg 3: mars back to earth
+    % mars to earth
     [V3, V4] = gauss_lam(R_m, R_e1, TOFs(2), gauss_maneuver_directions(2));
-    % DV 2: DSM after mars flyby
-    dv_total = dv_total + norm(V3 - V_marsfb_out);
 
-    %% leg 4: earth flyby
-    V_earthfb_out = flyby_exit_vel(V4, V_e1, flyby_heights(2), rad_earth, mu_earth);
-
-    %% leg 5: earth to jupiter
+    % earth to jupiter
     [V5, V6] = gauss_lam(R_e1, R_j, TOFs(3), gauss_maneuver_directions(3));
-    % DV 3: DSM after earth flyby
-    dv_total = dv_total + norm(V5 - V_earthfb_out);
 
-    %% leg 6: jupiter flyby
-    V_jupfb_out = flyby_exit_vel(V6, V_j, flyby_heights(3), rad_jup, mu_jup);
-
-    %% leg 7: jupiter to neptune
+    % jupiter to neptune
     [V7, V8] = gauss_lam(R_j, R_n, TOFs(4), gauss_maneuver_directions(4));
-    % DV 4: DSM after jupiter flyby
-    dv_total = dv_total + norm(V7 - V_jupfb_out);
+    
 
-    %% leg 8: entry into neptune orbit
-    v9 = sqrt(mu_neptune/(rad_neptune + 2000)); % neptune orbit velocity
-    % DV 5: entering neptune orbit
-    dv_total = dv_total + norm(V8 - V_n) - v9; % subtracting v9 to assume optimal entry angle
+    %% deltaV from flybys
+    % TODO add inclination params. zeroes currently
+
+    % mars flyby
+    dv_marsfb = gravity_assist(V2, V3, flyby_heights(1), rad_mars, V_m, mu_mars, 0, 0);
+
+    % earth flyby
+    dv_earthfb = gravity_assist(V4, V5, flyby_heights(2), rad_earth, V_e1, mu_earth, 0, 0);
+
+    % jupiter flyby
+    dv_jupfb = gravity_assist(V6, V7, flyby_heights(3), rad_jup, V_j, mu_jup, 0, 0);
+
+    % add flyby dv accrued to total
+    dv_total = dv_total + dv_marsfb + dv_earthfb + dv_jupfb;
+
+
+    %% deltaV incurred from leaving/entering orbits
+
+    % DV leaving earth orbit
+    v0 = sqrt(mu_earth/(rad_earth + 500)) * (TU_s/AU_km); % earth orbit velocity
+    dv_total = dv_total + norm(V1 - V_e0) - v0; % subtracting v0 to assume optimal launch angle
+    
+    % DV entering neptune orbit
+    v9 = sqrt(mu_neptune/(rad_neptune + 2000)) * (TU_s/AU_km); % neptune orbit velocit
+    dv_total = dv_total + norm(V8 - V_n) - v9 ; % subtracting v9 to assume optimal entry angle
    
 end
