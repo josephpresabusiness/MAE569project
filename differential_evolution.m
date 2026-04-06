@@ -1,4 +1,4 @@
-function [x_best, dv_best] = differential_evolution(fitness_fn, lb, ub, opts)
+function [x_best, dv_best,x_best_list,dv_best_list] = differential_evolution(fitness_fn, lb, ub, opts)
     % opts.pop_size  : e.g. 200
     % opts.max_gen   : e.g. 1000
     % opts.F         : mutation scale, e.g. 0.8
@@ -37,8 +37,15 @@ function [x_best, dv_best] = differential_evolution(fitness_fn, lb, ub, opts)
                 fitness_vals(i) = trial_fit;
             end
         end
-
+        fitness_vals = fitness_vals.*29.79;
+        [dv_current,idx_current] = min(fitness_vals);
+        x_current = pop(idx_current,:);
+        x_best_list(1,gen) = gen;
+        dv_best_list(1,gen) = gen;
+        dv_best_list(2,gen) = dv_current;
+        x_best_list(2:13,gen) = x_current';
         fprintf('Gen %d | Best ΔV: %.4f km/s\n', gen, min(fitness_vals));
+        
     end
 
     [dv_best, best_idx] = min(fitness_vals);

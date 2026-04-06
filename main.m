@@ -1,7 +1,7 @@
 % lower and upper bounds
 % note: strange numbers in spot 1 are datenum format for start and end of
 % launch window i.e. 2026-1-1, 2046-12-31
-
+clear;clc;close all
 lb = [739983,... % launch time
     1, 1, 10, 60,... % transfer time, TU
     2000, 1500, 1000,... % flyby height, km
@@ -11,7 +11,7 @@ ub = [747652,... % launch time
     10, 10, 40, 475,... % transfer time, TU
     1e5, 1e5, 3e5,... % flyby height, km
     1,1,1,1]; % path type
- 
+
 % max expcected TU for hohmann transfers:
 % e <-> m: 8.907 TU
 % m-> j: 38.732 TU
@@ -19,17 +19,15 @@ ub = [747652,... % launch time
 
 % differential evolution options
 opts.pop_size = 500;
-opts.max_gen  = 50;
+opts.max_gen  = 500000;
 opts.F        = 0.8;
 opts.CR       = 0.9;
 
 fitness_fn = @(x) fitness(x);
-[x_best, dv_best] = differential_evolution(fitness_fn, lb, ub, opts);
-
-vel_conversion_factor = 29.78594; % 1 AU/TU = 29.78594 km/s. dv is initially in AU/TU
+[x_best, dv_best,x_best_list,dv_best_list] = differential_evolution(fitness_fn, lb, ub, opts);
 
 format shortg
-fprintf('Best solution: %.3f km/s total ΔV\n', dv_best*vel_conversion_factor);
+fprintf('Best solution: %.3f km/s total ΔV\n', dv_best);
 fprintf('best state:\n');
 fprintf("launch date: %s\n", datetime(x_best(1),'ConvertFrom','datenum'));
 fprintf("earth to mars TOF: %f days\n", x_best(2) * 58.13);
