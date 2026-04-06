@@ -18,7 +18,7 @@ function dv_total = fitness (x)
     % standard practice in preliminary mission design, so we feel fairly
     % safe in assuming it. 
     t1 = launch_time;
-    t2 = launch_date + TOFs(1);
+    t2 = launch_time + TOFs(1);
     t3 = t2 + TOFs(2);
     t4 = t3 + TOFs(3);
     t5 = t4 + TOFs(4);
