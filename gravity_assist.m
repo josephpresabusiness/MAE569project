@@ -11,7 +11,7 @@ function [dv,TOF] = gravity_assist(v1a,v1d,approach_alt,r_planet,v_planet,mu,i_p
 
     % Outputs
     % dv: delta-v to go from v1a to v1d, including a burn at the turn point
-
+    M_sun = 1.989*10^30;
     r_SOI = R_planet1*(m_planet1/M_sun)^2/5;
     rp = r_planet+approach_alt; % scalar
     v_inf_a_vec = v1a-v_planet; % vector
