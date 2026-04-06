@@ -63,13 +63,13 @@ function dv_total = fitness (x)
     % TODO add inclination params. zeroes currently
 
     % mars flyby
-    dv_marsfb = gravity_assist(V2, V3, flyby_heights(1), rad_mars, V_m, mu_mars, 0, 0);
+    dv_marsfb = gravity_assist(V2, V3, flyby_heights(1), rad_mars, V_m, mu_mars,1.85, 0.00005, 0.641691*10^24, R_m);
 
     % earth flyby
-    dv_earthfb = gravity_assist(V4, V5, flyby_heights(2), rad_earth, V_e1, mu_earth, 0, 0);
+    dv_earthfb = gravity_assist(V4, V5, flyby_heights(2), rad_earth, V_e1, mu_earth, 0.00005, 1.304, 5.97217*10^24, R_e1);
 
     % jupiter flyby
-    dv_jupfb = gravity_assist(V6, V7, flyby_heights(3), rad_jup, V_j, mu_jup, 0, 0);
+    dv_jupfb = gravity_assist(V6, V7, flyby_heights(3), rad_jup, V_j, mu_jup, 1.304, 1.77, 1898.125*10^24, R_j);
 
     % add flyby dv accrued to total
     dv_total = dv_total + dv_marsfb + dv_earthfb + dv_jupfb;
