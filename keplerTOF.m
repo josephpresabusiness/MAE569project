@@ -11,7 +11,7 @@ function [r_vec, v_vec] = keplerTOF(r0_vec,v0_vec,mu,t)
     mu_tn = @(xn) a*( xn - sqra*sin(xn/sqra)) + (rdv*a*( 1 - cos(xn/sqra) )/sqrm) + ...
     (r0*sqra*sin(xn/sqra));
     tn = @(xn) (mu_tn(xn) / sqrm) - t;
-    x = fzero(tn,sqrma*t);
+    x = fzero(tn,abs(sqrma*t));
 
     %calculate f and g, get r
     f = 1 - a*(1 - cos(x/sqra))/r0;
