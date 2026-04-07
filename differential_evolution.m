@@ -25,6 +25,7 @@ function [x_best, dv_best,x_best_list,dv_best_list] = differential_evolution(fit
 
             mutant = a + opts.F * (b - c);
             mutant = min(max(mutant, lb), ub); % enforce bounds
+            mutant(:, end-3:end) = round(mutant(:, end-3:end)); % more rounding for bools
 
             mask  = rand(1, N) < opts.CR;
             mask(randi(N)) = true; % ensure at least 1 dimension crosses
