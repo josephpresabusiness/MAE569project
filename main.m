@@ -19,7 +19,7 @@ ub = [747652,... % launch time
 
 % differential evolution options
 opts.pop_size = 500;
-opts.max_gen  = 10;
+opts.max_gen  = 100;
 opts.F        = 0.8;
 opts.CR       = 0.9;
 
