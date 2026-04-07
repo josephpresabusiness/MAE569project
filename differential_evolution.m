@@ -45,10 +45,9 @@ function [x_best, dv_best,x_best_list,dv_best_list] = differential_evolution(fit
 
         [dv_current,idx_current] = min(fitness_vals);
         x_current = pop(idx_current,:);
-        x_best_list(gen, 1) = gen;
         dv_best_list(gen, 1) = gen;
         dv_best_list(gen, 2) = dv_current;
-        x_best_list(gen, 2:13) = x_current;
+        x_best_list(gen, 1:12) = x_current;
         fprintf('Gen %d | Best ΔV: %.4f km/s\n', gen, min(fitness_vals));
     end
 
