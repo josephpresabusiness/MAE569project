@@ -22,14 +22,16 @@ hold on; axis equal; % grid on;
 set(gcf, 'Color', 'k');
 
 %% stars for fun
-% size=40; % 40 TU spread of stars
-% num_stars = 200;
-% x=size*rand(1,num_stars); y=size*rand(1,num_stars); z=size*rand(1,num_stars);
-% scatter3(2*(x-0.5*size), 2*(y-0.5*size), 2*(z-0.5*size), 'MarkerFaceColor', 'w', 'LineWidth', 0.1);
+size=60; % AU spread of stars
+num_stars = 400;
+x=size*rand(1,num_stars); y=size*rand(1,num_stars); z=size*rand(1,num_stars);
+scatter3(2*(x-0.5*size), 2*(y-0.5*size), 2*(z-0.5*size), 4,....
+    'MarkerFaceColor', 'w', 'Clipping','off');
 
 %% sun
 
-scatter3([0],[0],[0], 'MarkerFaceColor', 'y', 'LineWidth', 1);
+scatter3(0,0,0, 200, 'filled', ...
+        'MarkerFaceColor', 'y', 'Clipping', 'off');
 
 %% graph planet orbits
 selected_planets = ["Earth", "Mars", "Jupiter", "Neptune", ...
@@ -38,6 +40,7 @@ planet_colors = ["#11BF59", "#BF3411", "#BF8B11", "#1173BF", ...
     "#F4740C", "#C9BE46", "#BCB993", "#22D9E2", "#B3BFD6"];
 idx = 1;
 num_points = 300;
+theta_space = linspace(0,360,num_points);
 
 for planet = selected_planets
     color = planet_colors(idx);
@@ -45,7 +48,6 @@ for planet = selected_planets
     index = find(planets == planet); % index of planet in lists
     a = a_list(index); e = e_list(index); i = i_list(index);
     Om = Omega_list(index); ap = ap_list(index);
-    theta_space = linspace(0,360,num_points);
 
     for k = 1:num_points
         [r_traj(:, k),~] = orbital_ele_to_r_v(a,e,i,Om,ap,theta_space(k),1,false);
@@ -73,11 +75,17 @@ planet_positions = [R_ea, R_ma, R_ju, R_ne, R_me, R_ve, R_sa, R_ur, R_pl];
 
 for i=1:9
     scatter3(planet_positions(1,i), planet_positions(2,i), planet_positions(3,i), ...
-        120, 'filled', ...
-        'MarkerFaceColor', planet_colors(i), 'DisplayName', selected_planets(i), 'Clipping', 'off');
+        70, 'filled', 'MarkerFaceColor', planet_colors(i), ...
+        'DisplayName', selected_planets(i), 'Clipping', 'off');
     % Optional: label them
     % text(planet_positions(1,i), planet_positions(2,i), planet_positions(3,i), ...
     %     "  " + selected_planets(i), 'Color', 'w', 'FontSize', 9);
+end
+
+% saturn's ring for the culture
+r_ring = zeros(3,num_points);
+for t = theta_space
+
 end
 
 gca.Clipping = 'off';
