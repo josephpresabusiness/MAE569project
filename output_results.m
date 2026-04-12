@@ -81,13 +81,13 @@ dv_total = dv_total + dv_marsfb + dv_earthfb + dv_jupfb;
 %% deltaV incurred from leaving/entering orbits
 
 % DV leaving earth orbit
-v0 = sqrt(mu_earth/(rad_earth + 500)) * (TU_s/AU_km); % earth orbit velocity
-dv_earthorbit = norm(V1 - V_e0) - v0; % subtracting v0 to assume optimal launch angle
+v0 = sqrt(mu_earth/(rad_earth + 500/AU_km)); % earth orbit velocity
+dv_earthorbit = abs(norm(V1 - V_e0) - v0); % subtracting v0 to assume optimal launch angle
 dv_total = dv_total + dv_earthorbit;
 
 % DV entering neptune orbit
-v9 = sqrt(mu_neptune/(rad_neptune + 2000)) * (TU_s/AU_km); % neptune orbit velocity
-dv_neporbit = norm(V8 - V_n) - v9 ; % subtracting v9 to assume optimal entry angle
+v9 = sqrt(mu_neptune/(rad_neptune + 2000/AU_km)); % neptune orbit velocity
+dv_neporbit = abs(norm(V8 - V_n) - v9); % subtracting v9 to assume optimal entry angle
 dv_total = dv_total + dv_neporbit;
 
 
