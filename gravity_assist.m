@@ -1,4 +1,4 @@
-function [dv,TOF] = gravity_assist(v1a,v1d,approach_alt,r_planet,v_planet,mu,i_planet1,i_planet2,m_planet1,R_planet1)
+function [dv,TOF,delta_a,delta_d] = gravity_assist(v1a,v1d,approach_alt,r_planet,v_planet,mu,i_planet1,i_planet2,m_planet1,R_planet1)
     % Inputs
     % v1a: approach velocity in sun frame
     % v1d: departure velocity in sun frame
@@ -12,14 +12,14 @@ function [dv,TOF] = gravity_assist(v1a,v1d,approach_alt,r_planet,v_planet,mu,i_p
     % Outputs
     % dv: delta-v to go from v1a to v1d, including a burn at the turn point
     M_sun = 1.989*10^30;
-    r_SOI = R_planet1*(m_planet1/M_sun)^2/5;
-    rp = r_planet+approach_alt; % scalar
-    v_inf_a_vec = v1a-v_planet; % vector
-    v_inf_d_vec = v1d-v_planet; % vector
-    v_inf_a = norm(v_inf_a_vec); % scalar
-    v_inf_d = norm(v_inf_d_vec); % scalar
-    epsilon_a = v_inf_a^2/2; % scalar
-    epsilon_d = v_inf_d^2/2; % scalar
+    r_SOI = norm(R_planet1)*(m_planet1/M_sun)^(2/5); % AU
+    rp = r_planet+approach_alt/(1.496*10^8); % AU
+    v_inf_a_vec = v1a-v_planet; % AU/TU
+    v_inf_d_vec = v1d-v_planet; % AU/TU
+    v_inf_a = norm(v_inf_a_vec); % AU/TU
+    v_inf_d = norm(v_inf_d_vec); % AU/TU
+    epsilon_a = v_inf_a^2/2; % AU^2/TU^2
+    epsilon_d = v_inf_d^2/2; % AU^2/TU^2
     a_a = -mu/(2*epsilon_a); % scalar
     a_d = -mu/(2*epsilon_d); % scalar
     b_a = sqrt((rp-a_a)^2-a_a^2); % scalar
@@ -49,5 +49,5 @@ function [dv,TOF] = gravity_assist(v1a,v1d,approach_alt,r_planet,v_planet,mu,i_p
     F_d = acosh((e_d+cosd(theta_d))/(1+e_d*cosd(theta_d)));
     TOF_a = ((e_a*sinh(F_a)-F_a)-(e_a*sinh(F_pa)-F_pa))/n_a;
     TOF_d = ((e_d*sinh(F_d)-F_d)-(e_d*sinh(F_pd)-F_pd))/n_d;
-    TOF = TOF_a+TOF_d;
+    TOF = (TOF_a+TOF_d)*58.13;
 end
