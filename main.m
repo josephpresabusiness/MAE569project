@@ -1,3 +1,9 @@
+%% MAE 569 Spring 2026 Final Project
+% Contributers: Joeseph Presa, Lee Wallenfang, Ryan O'Connor, Devan McGaha
+
+% This MATLAB script calls all other necessary scripts in order to solve the problem.
+% Ensure that all necessary .m files are present in the directory when executing this script.
+
 clear;clc;close all
 % lower and upper bounds
 % note: strange numbers in spot 1 are datenum format for start and end of
