@@ -1,9 +1,14 @@
-x = [741827.1571,... % launch time
-        3.1826, 3.6709, 11.9643, 258.0782,... % transfer time, TU
-        100000, 100000, 299935.857,... % flyby height, km
-        0,1,1,0]; % path type
+% x = [741827.1571,... % launch time
+%         3.1826, 3.6709, 11.9643, 258.0782,... % transfer time, TU
+%         100000, 100000, 299935.857,... % flyby height, km
+%         0,1,1,0]; % path type
+% x = [7.436987639948241e+05,... % launch time
+%         9.8722, 1.2526, 39.5675, 60,... % transfer time, TU
+%         2000, 17408, 40441,... % flyby height, km
+%         1,0,1,0]; % path type
+x = [7.443624518353844e+05,8.208243576745915,3.930288887837828,10,60,2000,8.472689022255523e+04,1000,1,0,0,1];
 
-
+% x = [7.428860315871199e+05    9.918145828087649    1.054357118217943    37.7    60    7.760771155586738e+04    8.284042972654503e+04    300000    1    0    1    1];
  % outputs total delta v given state vector defining trajectory.
     % note: TOFs in tu, flyby heights in km
     % note: scalar r,v in lowercase, vector R,V in uppercase.
@@ -66,13 +71,13 @@ mu_neptune = 6835100 * (TU_s^2 / AU_km^3);
 %% deltaV from flybys
 
  % mars flyby
-dv_marsfb = gravity_assist(V2, V3, flyby_heights(1), rad_mars, V_m, mu_mars,1.85, 0.00005, 0.641691*10^24, R_m);
+[dv_marsfb,TOFMars] = gravity_assist(V2, V3, flyby_heights(1), rad_mars, V_m, mu_mars,1.85, 0.00005, 0.641691*10^24, R_m);
 
 % earth flyby
-dv_earthfb = gravity_assist(V4, V5, flyby_heights(2), rad_earth, V_e1, mu_earth, 0.00005, 1.304, 5.97217*10^24, R_e1);
+[dv_earthfb,TOFEarth] = gravity_assist(V4, V5, flyby_heights(2), rad_earth, V_e1, mu_earth, 0.00005, 1.304, 5.97217*10^24, R_e1);
 
 % jupiter flyby
-dv_jupfb = gravity_assist(V6, V7, flyby_heights(3), rad_jup, V_j, mu_jup, 1.304, 1.77, 1898.125*10^24, R_j);
+[dv_jupfb,TOFJupiter] = gravity_assist(V6, V7, flyby_heights(3), rad_jup, V_j, mu_jup, 1.304, 1.77, 1898.125*10^24, R_j);
 
 % add flyby dv accrued to total
 dv_total = dv_total + dv_marsfb + dv_earthfb + dv_jupfb;
@@ -82,6 +87,8 @@ dv_total = dv_total + dv_marsfb + dv_earthfb + dv_jupfb;
 
 % DV leaving earth orbit
 v0 = sqrt(mu_earth/(rad_earth + 500/AU_km)); % earth orbit velocity
+test = norm(V1);
+test2 = norm(V_e0);
 dv_earthorbit = abs(norm(V1 - V_e0) - v0); % subtracting v0 to assume optimal launch angle
 dv_total = dv_total + dv_earthorbit;
 
@@ -185,3 +192,8 @@ disp(dv_total*vel_conversion_factor)
 
 fprintf("\nPART h: Delta V (AU/TU):\n")
 fprintf("done in run_trajectory_graph.m.\n")
+
+fprintf("TOF of flybys\n")
+fprintf("Mars: %4.4f\n",TOFMars)
+fprintf("Earth: %4.4f\n",TOFEarth)
+fprintf("Jupiter: %4.4f\n",TOFJupiter)
